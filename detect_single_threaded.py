@@ -66,15 +66,20 @@ if __name__ == '__main__':
         help='Size of the queue.')
     args = parser.parse_args()
 
+    start_time = 140 # in seconds
+
     cap = cv2.VideoCapture(args.video_source)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, args.width)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, args.height)
+    cap.set(cv2.CAP_PROP_POS_MSEC, start_time * 1000)
 
     start_time = datetime.datetime.now()
     num_frames = 0
     im_width, im_height = (cap.get(3), cap.get(4))
+    print("Image Width: ", im_width)
+    print("Image Height: ", im_height)
     # max number of hands we want to detect/track
-    num_hands_detect = 2
+    num_hands_detect = 4
 
     cv2.namedWindow('Single-Threaded Detection', cv2.WINDOW_NORMAL)
 
