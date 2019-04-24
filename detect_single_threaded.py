@@ -3,6 +3,7 @@ import cv2
 import tensorflow as tf
 import datetime
 import argparse
+from centroid_tracker import CentroidTracker
 
 detection_graph, sess = detector_utils.load_inference_graph()
 
@@ -73,6 +74,8 @@ if __name__ == '__main__':
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, args.height)
     cap.set(cv2.CAP_PROP_POS_MSEC, start_time * 1000)
 
+    ct = CentroidTracker()
+
     start_time = datetime.datetime.now()
     num_frames = 0
     im_width, im_height = (cap.get(3), cap.get(4))
@@ -102,7 +105,7 @@ if __name__ == '__main__':
         # draw bounding boxes on frame
         detector_utils.draw_box_on_image(num_hands_detect, args.score_thresh,
                                          scores, boxes, im_width, im_height,
-                                         image_np)
+                                         image_np, ct)
 
         # Calculate Frames per second (FPS)
         num_frames += 1
