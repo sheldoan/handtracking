@@ -21,6 +21,8 @@ class CentroidTracker():
         # need to deregister the object from tracking
         self.maxDisappeared = maxDisappeared
 
+        self.padding_scale_factor = 0.10
+
     def getStatus(self):
         return "Tracking " + str(len(self.objects)) + " objects and " + str(len(self.disappeared)) + " disappeared"
 
@@ -43,9 +45,11 @@ class CentroidTracker():
         del self.disappeared[objectID]
 
         frames_data = self.objectFrameInfo[objectID]
+        frame_height, frame_width = self.frames[list(self.frames.keys())[0]]['frame'].shape[:2]
+
         print("Deregistering", objectID, ":", frames_data)
         if len(frames_data.keys()) > 10:
-            print("Saving video candidate")
+            print("Saving video candidate", objectID)
             min_left = 10000000000
             max_right = -1
             min_top = 10000000000
@@ -59,6 +63,14 @@ class CentroidTracker():
                     min_top = box[1]
                 if box[3] > max_bottom:
                     max_bottom = box[3]
+
+            width_padding = (max_right - min_left) * self.padding_scale_factor
+            height_padding = (max_bottom - min_top) * self.padding_scale_factor
+
+            min_left = int(max(0, min_left - width_padding*0.5))
+            max_right = int(min(frame_width, max_right + width_padding*0.5))
+            min_top = int(max(0, min_top - height_padding*0.5))
+            max_bottom = int(min(frame_height, max_bottom + height_padding*0.5))
 
             max_width = max_right - min_left
             max_height = max_bottom - min_top
@@ -74,10 +86,9 @@ class CentroidTracker():
             out = cv2.VideoWriter('output/output' + str(objectID) + '.mp4', out_fourcc, 20, (max_width, max_height))
             for i in range(start_frame, end_frame + 1):
                 im_frame = self.frames[i]['frame']
-                if frame_no in frames_data:
-                    box = frames_data[frame_no]
-                    cropped = im_frame[min_top:max_bottom, min_left:max_right]
-                    out.write(cropped)
+                #if frame_no in frames_data:
+                cropped = im_frame[min_top:max_bottom, min_left:max_right]
+                out.write(cropped)
                     # cv2.imshow("cropped", cropped)
                     # cv2.waitKey(0)
             out.release()
@@ -87,7 +98,7 @@ class CentroidTracker():
     def update(self, rects, frame_num, frame_image):
         # store the frame, because at least one object is in it
         self.frames[frame_num] = { 'frame' : frame_image, 'object_ids' : []}
-        
+
         # check to see if the list of input bounding box rectangles
         # is empty
         if len(rects) == 0:
@@ -214,6 +225,6 @@ class CentroidTracker():
             excess_frames = len(self.frames) - max_frames_to_keep
             for i in range(0, excess_frames):
                 popped_frame_index = self.frames.popitem(last=False)
-                print("Popped frame ", popped_frame_index)
+                # print("Popped frame ", popped_frame_index)
         # return the set of trackable objects
         return self.objects
