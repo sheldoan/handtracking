@@ -65,14 +65,21 @@ if __name__ == '__main__':
         type=int,
         default=5,
         help='Size of the queue.')
-    args = parser.parse_args()
+    parser.add_argument(
+        '-st',
+        '--start-offset',
+        dest='start_offset',
+        type=int,
+        default=0,
+        help='Start time in seconds.'
+    )
 
-    start_time = 140 # in seconds
+    args = parser.parse_args()
 
     cap = cv2.VideoCapture(args.video_source)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, args.width)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, args.height)
-    cap.set(cv2.CAP_PROP_POS_MSEC, start_time * 1000)
+    cap.set(cv2.CAP_PROP_POS_MSEC, args.start_offset * 1000)
 
     ct = CentroidTracker()
 
@@ -105,12 +112,15 @@ if __name__ == '__main__':
         # draw bounding boxes on frame
         detector_utils.draw_box_on_image(num_hands_detect, args.score_thresh,
                                          scores, boxes, im_width, im_height,
-                                         image_np, ct)
+                                         image_np, ct, num_frames)
 
         # Calculate Frames per second (FPS)
         num_frames += 1
         elapsed_time = (datetime.datetime.now() - start_time).total_seconds()
         fps = num_frames / elapsed_time
+
+        if num_frames % 30 == 0:
+            print("Status:", ct.getStatus())
 
         if (args.display > 0):
             # Display FPS on frame

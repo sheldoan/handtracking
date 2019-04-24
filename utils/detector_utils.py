@@ -50,7 +50,7 @@ def load_inference_graph():
 
 # draw the detected bounding boxes on the images
 # You can modify this to also draw a label.
-def draw_box_on_image(num_hands_detect, score_thresh, scores, boxes, im_width, im_height, image_np, centroid_tracker):
+def draw_box_on_image(num_hands_detect, score_thresh, scores, boxes, im_width, im_height, image_np, centroid_tracker, frame_num):
 	tracker_rects = []
 	for i in range(num_hands_detect):
 		if (scores[i] > score_thresh):
@@ -70,7 +70,7 @@ def draw_box_on_image(num_hands_detect, score_thresh, scores, boxes, im_width, i
 
 			#print("hand had score", scores[i], "area", bounding_area, "top left: ", p1, "bottom right", p2);
 
-	objects = centroid_tracker.update(tracker_rects)
+	objects = centroid_tracker.update(tracker_rects, frame_num)
 	# loop over the tracked objects
 	for (objectID, centroid) in objects.items():
 		# draw both the ID of the object and the centroid of the
