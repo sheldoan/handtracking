@@ -46,28 +46,42 @@ class CentroidTracker():
         print("Deregistering", objectID, ":", frames_data)
         if len(frames_data.keys()) > 10:
             print("Saving video candidate")
-            max_width = 0
-            max_height = 0
+            min_left = 10000000000
+            max_right = -1
+            min_top = 10000000000
+            max_bottom = -1
             for frame_no, box in frames_data.items():
-                curr_width = box[2] - box[0] # right - left
-                curr_height = box[3] - box[2] # bottom - top
+                if box[0] < min_left:
+                    min_left = box[0]
+                if box[2] > max_right:
+                    max_right = box[2]
+                if box[1] < min_top:
+                    min_top = box[1]
+                if box[3] > max_bottom:
+                    max_bottom = box[3]
 
-                if curr_width > max_width:
-                    max_width = curr_width
-                if curr_height > max_height:
-                    max_height = curr_height
+            max_width = max_right - min_left
+            max_height = max_bottom - min_top
 
             start_frame = list(frames_data.keys())[0]
             end_frame = list(frames_data.keys())[-1]
 
+            # 1. get the centroid and create correct sized boxes
+            # 2. write to csv video writer
+            # 3. delete frame images
+            # 4. interpolate for skipped frames
+            out_fourcc = cv2.VideoWriter_fourcc(*'MP4V')
+            out = cv2.VideoWriter('output/output' + str(objectID) + '.mp4', out_fourcc, 20, (max_width, max_height))
             for i in range(start_frame, end_frame + 1):
                 im_frame = self.frames[i]['frame']
                 if frame_no in frames_data:
                     box = frames_data[frame_no]
                     print ("on box: ", box)
-                    cropped = im_frame[box[1]:box[3], box[0]:box[2]]
-                    cv2.imshow("cropped", cropped)
-                    cv2.waitKey(0)
+                    cropped = im_frame[min_top:max_bottom, min_left:max_right]
+                    out.write(cropped)
+                    # cv2.imshow("cropped", cropped)
+                    # cv2.waitKey(0)
+            out.release()
 
         del self.objectFrameInfo[objectID]
 
