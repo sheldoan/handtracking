@@ -40,7 +40,29 @@ class CentroidTracker():
         del self.objects[objectID]
         del self.disappeared[objectID]
 
-        print("Deregistering", objectID, ":", self.objectFrameInfo[objectID])
+        frames_data = self.objectFrameInfo[objectID]
+        print("Deregistering", objectID, ":", frames_data)
+        # if len(frames_data.keys()) > 10:
+        #     print("Saving video candidate")
+        #     max_width = 0
+        #     max_height = 0
+        #     for frame_no, box in frames_data.items():
+        #         curr_width = box[2] - box[0] # right - left
+        #         curr_height = box[3] - box[2] # bottom - top
+        #
+        #         if curr_width > max_width:
+        #             max_width = curr_width
+        #         if curr_height > max_height:
+        #             max_height = curr_height
+        #
+        #     start_frame = frames_data.keys()[0]
+        #     end_frame = frames_data.keys()[-1]
+        #
+        #     for i in range(start_frame, end_frame + 1):
+        #         im_frame = get_frame(i)
+
+
+
         del self.objectFrameInfo[objectID]
 
     def update(self, rects, frame_num):
