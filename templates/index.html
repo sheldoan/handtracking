@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+  src="https://code.jquery.com/jquery-3.3.1.min.js"
+  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+  crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/packery@2/dist/packery.pkgd.js"></script>
+    <script>
+    $(document).ready(function() {
+        document.body.style.backgroundColor = "black";
+
+        $.ajax({
+            url: '/videos',
+            success: function(data) {
+                console.log("success!" + data)
+                var videos = JSON.parse(data)
+                console.log("videos.length: " + videos.length)
+                for (var i=0; i < videos.length; i++) {
+                    var curr_video = videos[i]
+                    $('#wrapper').append("<video autoplay loop muted playsinline><source src="+curr_video+" /></video>")
+                }
+            }
+        })
+    })
+    </script>
+  </head>
+  <body>
+    <div id="wrapper">
+    </div>
+  </body
+</html>
