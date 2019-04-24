@@ -76,7 +76,6 @@ class CentroidTracker():
                 im_frame = self.frames[i]['frame']
                 if frame_no in frames_data:
                     box = frames_data[frame_no]
-                    print ("on box: ", box)
                     cropped = im_frame[min_top:max_bottom, min_left:max_right]
                     out.write(cropped)
                     # cv2.imshow("cropped", cropped)
@@ -86,6 +85,9 @@ class CentroidTracker():
         del self.objectFrameInfo[objectID]
 
     def update(self, rects, frame_num, frame_image):
+        # store the frame, because at least one object is in it
+        self.frames[frame_num] = { 'frame' : frame_image, 'object_ids' : []}
+        
         # check to see if the list of input bounding box rectangles
         # is empty
         if len(rects) == 0:
@@ -103,9 +105,6 @@ class CentroidTracker():
             # return early as there are no centroids or tracking info
             # to update
             return self.objects
-
-        # store the frame, because at least one object is in it
-        self.frames[frame_num] = { 'frame' : frame_image, 'object_ids' : []}
 
         # initialize an array of input centroids for the current frame
         inputCentroids = np.zeros((len(rects), 2), dtype="int")
@@ -210,5 +209,11 @@ class CentroidTracker():
                 for col in unusedCols:
                     self.register(inputCentroids[col], rects[col], frame_num)
 
+        max_frames_to_keep = 1000
+        if len(self.frames) > max_frames_to_keep:
+            excess_frames = len(self.frames) - max_frames_to_keep
+            for i in range(0, excess_frames):
+                popped_frame_index = self.frames.popitem(last=False)
+                print("Popped frame ", popped_frame_index)
         # return the set of trackable objects
         return self.objects
