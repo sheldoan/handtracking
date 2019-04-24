@@ -66,24 +66,24 @@ def draw_box_on_image(num_hands_detect, score_thresh, scores, boxes, im_width, i
 
 			p1 = (int(left), int(top))
 			p2 = (int(right), int(bottom))
-			cv2.putText(image_np, str(scores[i]), (int(left), int(top) - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (77, 255, 9), 1)
+			#cv2.putText(image_np, str(scores[i]), (int(left), int(top) - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (77, 255, 9), 1)
 			color = (77, 255, 9) # green
 			bounding_area = (right - left) * (bottom - top)
 			if bounding_area > 10000:
 				color = (255, 255, 255)
-			cv2.rectangle(image_np, p1, p2, color, 3, 1)
+			#cv2.rectangle(image_np, p1, p2, color, 3, 1)
 
 			#print("hand had score", scores[i], "area", bounding_area, "top left: ", p1, "bottom right", p2);
 
 	objects = centroid_tracker.update(tracker_rects, frame_num, image_np)
 	# loop over the tracked objects
-	for (objectID, centroid) in objects.items():
-		# draw both the ID of the object and the centroid of the
-		# object on the output frame
-		text = "ID {}".format(objectID)
-		cv2.putText(image_np, text, (centroid[0] - 10, centroid[1] - 10),
-			cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-		cv2.circle(image_np, (centroid[0], centroid[1]), 4, (0, 255, 0), -1)
+	# for (objectID, centroid) in objects.items():
+	# 	# draw both the ID of the object and the centroid of the
+	# 	# object on the output frame
+	# 	text = "ID {}".format(objectID)
+	# 	cv2.putText(image_np, text, (centroid[0] - 10, centroid[1] - 10),
+	# 		cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+	# 	cv2.circle(image_np, (centroid[0], centroid[1]), 4, (0, 255, 0), -1)
 
 
 # Show fps value on image.

@@ -131,7 +131,7 @@ if __name__ == '__main__':
                 detector_utils.draw_fps_on_image("FPS : " + str(int(fps)),
                                                  image_np)
 
-            cv2.imshow('Single-Threaded Detection', orig_color_frame)
+            cv2.imshow('Single-Threaded Detection', image_np)
             if cv2.waitKey(25) & 0xFF == ord('q'):
                 cv2.destroyAllWindows()
                 break
