@@ -56,8 +56,13 @@ def draw_box_on_image(num_hands_detect, score_thresh, scores, boxes, im_width, i
 		if (scores[i] > score_thresh):
 			(left, right, top, bottom) = (boxes[i][1] * im_width, boxes[i][3] * im_width,
 										  boxes[i][0] * im_height, boxes[i][2] * im_height)
+			#import pdb; pdb.set_trace()
 
 			tracker_rects.append(np.array([left, top, right, bottom]).astype('int'))
+
+			#cropped = image_np[int(top):int(bottom), int(left):int(right)]
+			# cv2.imshow("cropped", image_np)
+			# cv2.waitKey(0)
 
 			p1 = (int(left), int(top))
 			p2 = (int(right), int(bottom))
@@ -70,7 +75,7 @@ def draw_box_on_image(num_hands_detect, score_thresh, scores, boxes, im_width, i
 
 			#print("hand had score", scores[i], "area", bounding_area, "top left: ", p1, "bottom right", p2);
 
-	objects = centroid_tracker.update(tracker_rects, frame_num)
+	objects = centroid_tracker.update(tracker_rects, frame_num, image_np)
 	# loop over the tracked objects
 	for (objectID, centroid) in objects.items():
 		# draw both the ID of the object and the centroid of the

@@ -101,18 +101,21 @@ if __name__ == '__main__':
             image_np = cv2.cvtColor(image_np, cv2.COLOR_BGR2RGB)
         except:
             print("Error converting to RGB")
+        # cv2.imshow('converted', image_np)
+        # cv2.waitKey(0)
 
         # Actual detection. Variable boxes contains the bounding box cordinates for hands detected,
         # while scores contains the confidence for each of these boxes.
         # Hint: If len(boxes) > 1 , you may assume you have found atleast one hand (within your score threshold)
 
-        boxes, scores = detector_utils.detect_objects(image_np,
+        boxes, scores = detector_utils.detect_objects(image_np.copy(),
                                                       detection_graph, sess)
 
+        orig_color_frame = cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
         # draw bounding boxes on frame
         detector_utils.draw_box_on_image(num_hands_detect, args.score_thresh,
                                          scores, boxes, im_width, im_height,
-                                         image_np, ct, num_frames)
+                                         orig_color_frame, ct, num_frames)
 
         # Calculate Frames per second (FPS)
         num_frames += 1
@@ -128,9 +131,7 @@ if __name__ == '__main__':
                 detector_utils.draw_fps_on_image("FPS : " + str(int(fps)),
                                                  image_np)
 
-            cv2.imshow('Single-Threaded Detection',
-                       cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR))
-
+            cv2.imshow('Single-Threaded Detection', orig_color_frame)
             if cv2.waitKey(25) & 0xFF == ord('q'):
                 cv2.destroyAllWindows()
                 break
