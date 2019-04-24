@@ -2,6 +2,7 @@
 from scipy.spatial import distance as dist
 from collections import OrderedDict
 import numpy as np
+import cv2
 
 class CentroidTracker():
     def __init__(self, maxDisappeared=5):
@@ -29,6 +30,7 @@ class CentroidTracker():
         self.objects[self.nextObjectID] = centroid
         self.disappeared[self.nextObjectID] = 0
 
+        self.frames[frame_num]['object_ids'].append(self.nextObjectID)
         self.objectFrameInfo[self.nextObjectID] = OrderedDict()
         self.objectFrameInfo[self.nextObjectID][frame_num] = rect
 
@@ -42,30 +44,34 @@ class CentroidTracker():
 
         frames_data = self.objectFrameInfo[objectID]
         print("Deregistering", objectID, ":", frames_data)
-        # if len(frames_data.keys()) > 10:
-        #     print("Saving video candidate")
-        #     max_width = 0
-        #     max_height = 0
-        #     for frame_no, box in frames_data.items():
-        #         curr_width = box[2] - box[0] # right - left
-        #         curr_height = box[3] - box[2] # bottom - top
-        #
-        #         if curr_width > max_width:
-        #             max_width = curr_width
-        #         if curr_height > max_height:
-        #             max_height = curr_height
-        #
-        #     start_frame = frames_data.keys()[0]
-        #     end_frame = frames_data.keys()[-1]
-        #
-        #     for i in range(start_frame, end_frame + 1):
-        #         im_frame = get_frame(i)
+        if len(frames_data.keys()) > 10:
+            print("Saving video candidate")
+            max_width = 0
+            max_height = 0
+            for frame_no, box in frames_data.items():
+                curr_width = box[2] - box[0] # right - left
+                curr_height = box[3] - box[2] # bottom - top
 
+                if curr_width > max_width:
+                    max_width = curr_width
+                if curr_height > max_height:
+                    max_height = curr_height
 
+            start_frame = list(frames_data.keys())[0]
+            end_frame = list(frames_data.keys())[-1]
+
+            for i in range(start_frame, end_frame + 1):
+                im_frame = self.frames[i]['frame']
+                if frame_no in frames_data:
+                    box = frames_data[frame_no]
+                    print ("on box: ", box)
+                    cropped = im_frame[box[1]:box[3], box[0]:box[2]]
+                    cv2.imshow("cropped", cropped)
+                    cv2.waitKey(0)
 
         del self.objectFrameInfo[objectID]
 
-    def update(self, rects, frame_num):
+    def update(self, rects, frame_num, frame_image):
         # check to see if the list of input bounding box rectangles
         # is empty
         if len(rects) == 0:
@@ -83,6 +89,9 @@ class CentroidTracker():
             # return early as there are no centroids or tracking info
             # to update
             return self.objects
+
+        # store the frame, because at least one object is in it
+        self.frames[frame_num] = { 'frame' : frame_image, 'object_ids' : []}
 
         # initialize an array of input centroids for the current frame
         inputCentroids = np.zeros((len(rects), 2), dtype="int")
@@ -150,6 +159,7 @@ class CentroidTracker():
                 self.disappeared[objectID] = 0
 
                 self.objectFrameInfo[objectID][frame_num] = rects[col]
+                self.frames[frame_num]['object_ids'].append(objectID)
 
                 # indicate that we have examined each of the row and
                 # column indexes, respectively
