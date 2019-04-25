@@ -12,12 +12,12 @@ app = Flask(__name__)
 
 @app.route("/output/<path:path>")
 def api_assets(path):
-    return send_from_directory('output', path)
+    return send_from_directory('static', path)
 
-@app.route("/videos")
-def api_videos():
+@app.route("/videos/<topic>")
+def api_videos(topic):
     video_names = []
-    for video_name in sorted(glob("static/" + "*.webm")):
+    for video_name in sorted(glob("static/" + topic + "/*.webm")):
         video_names.append(video_name)
     print("Video names length", len(video_names))
     return json.dumps(video_names)
