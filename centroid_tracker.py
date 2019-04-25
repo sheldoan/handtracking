@@ -22,7 +22,7 @@ class CentroidTracker():
         self.maxDisappeared = maxDisappeared
 
         self.padding_scale_factor = 0.10 # used to give the video clip some padding
-        self.folder_output = folder_output
+        self.folder_output = folder_output.rstrip('/')
 
     def getStatus(self):
         return "Tracking " + str(len(self.objects)) + " objects and " + str(len(self.disappeared)) + " disappeared"
