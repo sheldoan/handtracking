@@ -18,15 +18,40 @@
                 console.log("videos.length: " + videos.length)
                 for (var i=0; i < videos.length; i++) {
                     var curr_video = videos[i]
-                    $('#wrapper').append("<video autoplay loop muted playsinline><source src="+curr_video+" /></video>")
+                    $('.grid').append("<video autoplay loop muted playsinline class=\"grid-item\"><source src="+curr_video+" /></video>")
                 }
+
+                var vids = $('.grid').find('video');
+                waitForVideosToLoad(vids, function() {
+                    $('.grid').packery({
+                      // options
+                      itemSelector: '.grid-item',
+                      gutter: 5
+                    });
+                })
             }
         })
     })
+
+    function waitForVideosToLoad(vids, callback) {
+        if (vids.length == 0) {
+            callback();
+        }
+        var videosLoaded = 0;
+        vids.on('loadeddata', function() {
+            videosLoaded++;
+            console.log("Videos loaded: " + videosLoaded)
+            if (videosLoaded >= (0.9 * vids.length)) {
+                console.log("Running callback!")
+                callback();
+            }
+        })
+    }
+
     </script>
   </head>
   <body>
-    <div id="wrapper">
+    <div class="grid">
     </div>
   </body
 </html>

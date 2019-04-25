@@ -17,7 +17,7 @@ def api_assets(path):
 @app.route("/videos")
 def api_videos():
     video_names = []
-    for video_name in sorted(glob("static/" + "*.mp4")):
+    for video_name in sorted(glob("static/" + "*.webm")):
         video_names.append(video_name)
     print("Video names length", len(video_names))
     return json.dumps(video_names)
