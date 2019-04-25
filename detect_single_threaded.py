@@ -81,7 +81,7 @@ if __name__ == '__main__':
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, args.height)
     cap.set(cv2.CAP_PROP_POS_MSEC, args.start_offset * 1000)
 
-    ct = CentroidTracker()
+    ct = CentroidTracker(args.video_source.split('/')[-1])
 
     start_time = datetime.datetime.now()
     num_frames = 0

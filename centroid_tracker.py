@@ -5,7 +5,7 @@ import numpy as np
 import cv2
 
 class CentroidTracker():
-    def __init__(self, maxDisappeared=5):
+    def __init__(self, video_name, maxDisappeared=5):
         # initialize the next unique object ID along with two ordered
         # dictionaries used to keep track of mapping a given object
         # ID to its centroid and number of consecutive frames it has
@@ -83,7 +83,7 @@ class CentroidTracker():
             # 3. delete frame images
             # 4. interpolate for skipped frames
             out_fourcc = cv2.VideoWriter_fourcc(*'MP4V')
-            out = cv2.VideoWriter('output/output' + str(objectID) + '.mp4', out_fourcc, 20, (max_width, max_height))
+            out = cv2.VideoWriter('output/'+ self.video_name + str(objectID) + '.mp4', out_fourcc, 20, (max_width, max_height))
             for i in range(start_frame, end_frame + 1):
                 im_frame = self.frames[i]['frame']
                 #if frame_no in frames_data:
