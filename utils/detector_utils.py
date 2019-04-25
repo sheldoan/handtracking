@@ -50,40 +50,34 @@ def load_inference_graph():
 
 # draw the detected bounding boxes on the images
 # You can modify this to also draw a label.
-def draw_box_on_image(num_hands_detect, score_thresh, scores, boxes, im_width, im_height, image_np, centroid_tracker, frame_num):
+def draw_box_on_image(num_hands_detect, score_thresh, scores, boxes, im_width, im_height, image_np, debug_image, centroid_tracker, frame_num):
 	tracker_rects = []
 	for i in range(num_hands_detect):
 		if (scores[i] > score_thresh):
 			(left, right, top, bottom) = (boxes[i][1] * im_width, boxes[i][3] * im_width,
 										  boxes[i][0] * im_height, boxes[i][2] * im_height)
-			#import pdb; pdb.set_trace()
 
 			tracker_rects.append(np.array([left, top, right, bottom]).astype('int'))
 
-			#cropped = image_np[int(top):int(bottom), int(left):int(right)]
-			# cv2.imshow("cropped", image_np)
-			# cv2.waitKey(0)
-
 			p1 = (int(left), int(top))
 			p2 = (int(right), int(bottom))
-			#cv2.putText(image_np, str(scores[i]), (int(left), int(top) - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (77, 255, 9), 1)
+			# draw the score label
 			color = (77, 255, 9) # green
-			bounding_area = (right - left) * (bottom - top)
-			if bounding_area > 10000:
-				color = (255, 255, 255)
-			#cv2.rectangle(image_np, p1, p2, color, 3, 1)
+			cv2.putText(debug_image, str(scores[i]), (int(left), int(top) - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 1)
 
-			#print("hand had score", scores[i], "area", bounding_area, "top left: ", p1, "bottom right", p2);
+			# draw the bounding box
+			bounding_area = (right - left) * (bottom - top)
+			cv2.rectangle(debug_image, p1, p2, color, 3, 1)
 
 	objects = centroid_tracker.update(tracker_rects, frame_num, image_np)
 	# loop over the tracked objects
-	# for (objectID, centroid) in objects.items():
-	# 	# draw both the ID of the object and the centroid of the
-	# 	# object on the output frame
-	# 	text = "ID {}".format(objectID)
-	# 	cv2.putText(image_np, text, (centroid[0] - 10, centroid[1] - 10),
-	# 		cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-	# 	cv2.circle(image_np, (centroid[0], centroid[1]), 4, (0, 255, 0), -1)
+	for (objectID, centroid) in objects.items():
+		# draw both the ID of the object and the centroid of the
+		# object on the output frame
+		text = "ID {}".format(objectID)
+		cv2.putText(debug_image, text, (centroid[0] - 10, centroid[1] - 10),
+			cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+		cv2.circle(debug_image, (centroid[0], centroid[1]), 4, (0, 255, 0), -1)
 
 
 # Show fps value on image.

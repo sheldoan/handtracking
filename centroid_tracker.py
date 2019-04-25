@@ -5,7 +5,7 @@ import numpy as np
 import cv2
 
 class CentroidTracker():
-    def __init__(self, video_name, maxDisappeared=5):
+    def __init__(self, folder_output, maxDisappeared=5):
         # initialize the next unique object ID along with two ordered
         # dictionaries used to keep track of mapping a given object
         # ID to its centroid and number of consecutive frames it has
@@ -21,7 +21,8 @@ class CentroidTracker():
         # need to deregister the object from tracking
         self.maxDisappeared = maxDisappeared
 
-        self.padding_scale_factor = 0.10
+        self.padding_scale_factor = 0.10 # used to give the video clip some padding
+        self.folder_output = folder_output
 
     def getStatus(self):
         return "Tracking " + str(len(self.objects)) + " objects and " + str(len(self.disappeared)) + " disappeared"
@@ -47,7 +48,7 @@ class CentroidTracker():
         frames_data = self.objectFrameInfo[objectID]
         frame_height, frame_width = self.frames[list(self.frames.keys())[0]]['frame'].shape[:2]
 
-        print("Deregistering", objectID, ":", frames_data)
+        #print("Deregistering", objectID, ":", frames_data)
         if len(frames_data.keys()) > 10:
             print("Saving video candidate", objectID)
             min_left = 10000000000
@@ -83,7 +84,9 @@ class CentroidTracker():
             # 3. delete frame images
             # 4. interpolate for skipped frames
             out_fourcc = cv2.VideoWriter_fourcc(*'MP4V')
-            out = cv2.VideoWriter('output/'+ self.video_name + str(objectID) + '.mp4', out_fourcc, 20, (max_width, max_height))
+            out_filename = self.folder_output + "/output" + str(objectID).zfill(5) + '.mp4'
+            print ("Outfile: ", out_filename)
+            out = cv2.VideoWriter(out_filename, out_fourcc, 20, (max_width, max_height))
             for i in range(start_frame, end_frame + 1):
                 im_frame = self.frames[i]['frame']
                 #if frame_no in frames_data:
@@ -97,6 +100,7 @@ class CentroidTracker():
 
     def update(self, rects, frame_num, frame_image):
         # store the frame, because at least one object is in it
+        # we store the last X frames and delete any excess at the bottom of this method
         self.frames[frame_num] = { 'frame' : frame_image, 'object_ids' : []}
 
         # check to see if the list of input bounding box rectangles

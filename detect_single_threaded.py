@@ -4,12 +4,18 @@ import tensorflow as tf
 import datetime
 import argparse
 from centroid_tracker import CentroidTracker
+import os
 
 detection_graph, sess = detector_utils.load_inference_graph()
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        'folder_output',
+        metavar='folder_output',
+        help='an integer for the accumulator'
+    )
     parser.add_argument(
         '-sth',
         '--scorethreshold',
@@ -81,7 +87,10 @@ if __name__ == '__main__':
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, args.height)
     cap.set(cv2.CAP_PROP_POS_MSEC, args.start_offset * 1000)
 
-    ct = CentroidTracker(args.video_source.split('/')[-1])
+    folder_output = args.folder_output
+    if not os.path.exists(folder_output):
+        os.makedirs(folder_output)
+    ct = CentroidTracker(folder_output)
 
     start_time = datetime.datetime.now()
     num_frames = 0
@@ -96,7 +105,10 @@ if __name__ == '__main__':
     while True:
         # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
         ret, image_np = cap.read()
-        # image_np = cv2.flip(image_np, 1)
+
+        # Preserve the original color for video cropping
+        orig_color_frame = image_np
+        debug_image = orig_color_frame.copy() # used to show labels and bounding boxes
         try:
             image_np = cv2.cvtColor(image_np, cv2.COLOR_BGR2RGB)
         except:
@@ -108,14 +120,12 @@ if __name__ == '__main__':
         # while scores contains the confidence for each of these boxes.
         # Hint: If len(boxes) > 1 , you may assume you have found atleast one hand (within your score threshold)
 
-        boxes, scores = detector_utils.detect_objects(image_np.copy(),
+        boxes, scores = detector_utils.detect_objects(image_np,
                                                       detection_graph, sess)
-
-        orig_color_frame = cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
         # draw bounding boxes on frame
         detector_utils.draw_box_on_image(num_hands_detect, args.score_thresh,
                                          scores, boxes, im_width, im_height,
-                                         orig_color_frame, ct, num_frames)
+                                         orig_color_frame, debug_image, ct, num_frames)
 
         # Calculate Frames per second (FPS)
         num_frames += 1
@@ -129,12 +139,13 @@ if __name__ == '__main__':
             # Display FPS on frame
             if (args.fps > 0):
                 detector_utils.draw_fps_on_image("FPS : " + str(int(fps)),
-                                                 image_np)
+                                                 debug_image)
 
-            cv2.imshow('Single-Threaded Detection', image_np)
+            cv2.imshow('Single-Threaded Detection', debug_image)
             if cv2.waitKey(25) & 0xFF == ord('q'):
                 cv2.destroyAllWindows()
                 break
         else:
-            print("frames processed: ", num_frames, "elapsed time: ",
+            if num_frames % 30 == 0:
+                print("Frames processed: ", num_frames, "elapsed time: ",
                   elapsed_time, "fps: ", str(int(fps)))
